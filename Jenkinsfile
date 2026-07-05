@@ -33,10 +33,10 @@ pipeline {
         stage('Build and Push') {
             steps {
                 script {
-                    def fullTag = "${env.IMAGE_VERSION}-build-${env.BUILD_ID}"
-                    def vortexApp = docker.build "${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:${fullTag}"
+                    env.FullTag = "${env.IMAGE_VERSION}-build-${env.BUILD_ID}"
+                    def vortexApp = docker.build "${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:${env.FullTag}"
                     docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-credentials') {
-                        vortexApp.push("${fullTag}")
+                        vortexApp.push("${env.FullTag}")
                         vortexApp.push('latest')
                     }
                 }
@@ -44,8 +44,8 @@ pipeline {
         }
         stage ('Update k8s Manifest') {
             steps{
-                echo "Modifying image tag to ${fullTag}"
-                sh "sed -i 's/IMAGE_TAG_PLACEHOLDER/${fullTag}/g' k8s/deployment.yml"
+                echo "Modifying image tag to ${env.FullTag}"
+                sh "sed -i 's/IMAGE_TAG_PLACEHOLDER/${env.FullTag}/g' k8s/deployment.yml"
             }
         }
     }
