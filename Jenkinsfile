@@ -72,11 +72,10 @@ pipeline {
                                 git config user.name "MangeshGot"
                                 git config user.email "m.sonawanegot@gmail.com"
                                 
-                                # Stage the updated nested file
-                                git add vortex-chart/values.yaml
-                                
-                                # Protect the build from failing if no differences exist
+                                # 1. Check for differences FIRST
                                 if ! git diff --exit-code vortex-chart/values.yaml > /dev/null; then
+                                    # 2. Stage and commit only if changes exist
+                                    git add vortex-chart/values.yaml
                                     git commit -m 'chore(helm): upgrade vortex-chart image tag to ${env.FullTag}'
                                     git push https://${USERNAME}:${PASSWORD}@github.com/MangeshGot/helm-microservice.git main
                                 else
