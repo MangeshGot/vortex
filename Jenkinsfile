@@ -51,7 +51,7 @@ pipeline {
                         userRemoteConfigs:[[
                             credentialsId: 'github-creds',
                             url: 'https://github.com/MangeshGot/vortex-gitops'
-                        ]]
+                        ]],
                         extensions: [[$class: 'RelativeTargetDirectory', basedir: 'vortex-gitops']]
                     )
                     sh "sed -i 's/IMAGE_TAG_PLACEHOLDER/${env.FullTag}/g' vortex-gitops/k8s/deployment.yml"
@@ -61,10 +61,14 @@ pipeline {
                             usernameVariable: 'USERNAME', 
                             passwordVariable: 'PASSWORD')
                     ]){
-                        sh "cd vortex-gitops/k8s"
-                        sh "git add ."
-                        sh "git commit -m 'Update image tag to ${env.FullTag}'"
-                        sh "git push https://${USERNAME}:${PASSWORD}@github.com/MangeshGot/vortex-gitops.git"
+                        sh """
+                            cd vortex-gitops
+                            git config user.name "MangeshGot"
+                            git config user.email "[EMAIL_ADDRESS]"
+                            git add k8s/deployment.yml
+                            git commit -m 'Update image tag to ${env.FullTag}'
+                            git push https://${USERNAME}:${PASSWORD}@github.com/MangeshGot/vortex-gitops.git HEAD:main
+                        """
                     }   
                 }
             }
