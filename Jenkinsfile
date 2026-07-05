@@ -42,5 +42,11 @@ pipeline {
                 }
             }
         }
+        stage ('Update k8s Manifest') {
+            steps{
+                echo "Modifying image tag to ${fullTag}"
+                sh "sed -i 's/IMAGE_TAG_PLACEHOLDER/${fullTag}/g' k8s/deployment.yml"
+            }
+        }
     }
 }
