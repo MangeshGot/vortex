@@ -1,0 +1,90 @@
+[
+  {
+    "id": "rasiklal-dhariwal-modernization",
+    "title": "Modernizing Legacy Infrastructure",
+    "subtitle": "Transitioning to 100% Code-Defined Environments and GitOps-Driven Deployments",
+    "role": "DevOps Engineer",
+    "company": "Rasiklal M. Dhariwal International",
+    "period": "2019 – Present",
+    "challenge": {
+      "summary": "As operations scaled, manual environment setup on AWS created configuration drift, resulting in irregular testing conditions and failed production build stages. Additionally, physical and internal network configurations lacked proper segmentation, posing security and organizational traffic risks across departments.",
+      "painPoints": [
+        "Manual staging setup leading to environment drift and inconsistent testing runs",
+        "Slow deployment cycles due to lack of automated promotion and integration processes",
+        "No virtual boundary separation across internal department hardware networks, exposing administrative and staging zones"
+      ]
+    },
+    "architectureAndTools": {
+      "description": "Implemented modular AWS environments provisioned via version-controlled Infrastructure as Code templates coupled with an automated GitOps workflow that reconciles repository status directly into Kubernetes.",
+      "tools": [
+        { "name": "AWS", "category": "cloud" },
+        { "name": "Terraform", "category": "iac" },
+        { "name": "Kubernetes", "category": "containers" },
+        { "name": "Docker", "category": "containers" },
+        { "name": "Jenkins", "category": "cicd" },
+        { "name": "ArgoCD", "category": "cicd" }
+      ]
+    },
+    "pipelineStages": [
+      {
+        "stageName": "Git Operations",
+        "status": "success",
+        "tools": ["Git", "GitHub"],
+        "logs": [
+          "Checking out code branch: feature/eks-migration",
+          "Lint check complete: 0 warnings, 0 errors.",
+          "Pull request approved & merged to main branch."
+        ]
+      },
+      {
+        "stageName": "IaC Provisioning",
+        "status": "success",
+        "tools": ["Terraform", "AWS"],
+        "logs": [
+          "Initializing Terraform configurations...",
+          "Comparing active state against AWS VPC/EKS configs...",
+          "No drift detected. Infrastructure matches source code configurations."
+        ]
+      },
+      {
+        "stageName": "Container Build",
+        "status": "success",
+        "tools": ["Docker"],
+        "logs": [
+          "Loading Dockerfile context from workspace...",
+          "Building container image: vortex-api:v1.3.0",
+          "Optimizing multi-stage layer caches...",
+          "Image pushed successfully to AWS ECR."
+        ]
+      },
+      {
+        "stageName": "GitOps Deploy",
+        "status": "success",
+        "tools": ["ArgoCD", "Kubernetes"],
+        "logs": [
+          "Detecting version change in deployment manifests...",
+          "Synchronizing ArgoCD state with EKS Cluster...",
+          "Creating new pods, checking liveness/readiness probes...",
+          "Deployment complete. All replica pods running successfully."
+        ]
+      }
+    ],
+    "measurableResults": [
+      {
+        "label": "IaC Automation",
+        "value": "100%",
+        "description": "AWS VPCs, Subnets, and EKS clusters are created using automated scripts, ensuring 100% reproducible environments."
+      },
+      {
+        "label": "Deploy Integrity",
+        "value": "Zero Drift",
+        "description": "Continuous reconciliation using Argo CD blocks manual cluster modifications and maintains source code authority."
+      },
+      {
+        "label": "Network Isolation",
+        "value": "100% Segmented",
+        "description": "Campus hardware segmented securely using routers, L2 switches, and custom-configured VLAN boundaries."
+      }
+    ]
+  }
+]
