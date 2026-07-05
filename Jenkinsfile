@@ -35,8 +35,8 @@ pipeline {
                 script {
                     env.FullTag = "${env.IMAGE_VERSION}-build-${env.BUILD_ID}"
                     def vortexApp = docker.build "${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:${env.FullTag}"
-                    docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-credentials') {
-                        vortexApp.push("${env.FullTag}")
+                    docker.withRegistry('https://index.docker.io/v1/', "${env.DOCKER_CREDENTIALS_ID}") {
+                        vortexApp.push()
                         vortexApp.push('latest')
                     }
                 }
@@ -45,16 +45,22 @@ pipeline {
         stage ('Update GitOps Repo') {
             steps{
                 script {
-                    dir('vortex-gitops') {
+
+                    sh "rm -rf helm-microservice"
+                    
+                    dir('helm-microservice') {
                         checkout scmGit(
                             branches: [[name: 'main']],
                             userRemoteConfigs: [[
                                 credentialsId: 'github-creds',
-                                url: 'https://github.com/MangeshGot/vortex-gitops.git'
+                                url: 'https://github.com/MangeshGot/helm-microservice.git'
                             ]]
                         )
-                        echo "Modifying manifest file..."
-                        sh "sed -i 's/IMAGE_TAG_PLACEHOLDER/${env.FullTag}/g' k8s/deployment.yml"
+                        
+                        echo "Modifying Helm values file inside vortex-chart..."
+    
+                        sh "sed -i 's|tag:.*|tag: \"${env.FullTag}\"|g' vortex-chart/values.yaml"
+                        
                         withCredentials([
                             usernamePassword(
                                 credentialsId: 'github-creds', 
@@ -62,17 +68,30 @@ pipeline {
                                 passwordVariable: 'PASSWORD')
                         ]){
                             sh """
+                                git checkout main || git checkout -b main
                                 git config user.name "MangeshGot"
                                 git config user.email "m.sonawanegot@gmail.com"
-                                git add k8s/deployment.yml
-                                git commit -m 'Update image tag to ${env.FullTag}'
-                                git push https://${USERNAME}:${PASSWORD}@github.com/MangeshGot/vortex-gitops.git HEAD:main
+                                
+                                # Stage the updated nested file
+                                git add vortex-chart/values.yaml
+                                
+                                # Protect the build from failing if no differences exist
+                                if ! git diff --exit-code vortex-chart/values.yaml > /dev/null; then
+                                    git commit -m 'chore(helm): upgrade vortex-chart image tag to ${env.FullTag}'
+                                    git push https://${USERNAME}:${PASSWORD}@github.com/MangeshGot/helm-microservice.git main
+                                else
+                                    echo "No value changes detected. Skipping push."
+                                fi
                             """
                         }
                     }
-   
                 }
             }
+        }
+    }
+    post {
+        always {
+            cleanWs()
         }
     }
 }
