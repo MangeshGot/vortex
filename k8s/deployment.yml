@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vortex-deployment
+  labels:
+    app: vortex-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: vortex-deployment
+  template:
+    metadata:
+      labels:
+        app: vortex-deployment
+    spec:
+      containers:
+        - name: vortex
+          image: mangeshforstudy/vortex:IMAGE_TAG_PLACEHOLDER
+          ports:
+            -containerPort: 80
