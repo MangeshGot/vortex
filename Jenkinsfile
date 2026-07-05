@@ -42,10 +42,31 @@ pipeline {
                 }
             }
         }
-        stage ('Update k8s Manifest') {
+        stage ('Update GitOps Repo') {
             steps{
-                echo "Modifying image tag to ${env.FullTag}"
-                sh "sed -i 's/IMAGE_TAG_PLACEHOLDER/${env.FullTag}/g' k8s/deployment.yml"
+                script {
+                    sh "rm -rf vortex-gitops"
+                    checkout scmGit(
+                        branches:[[name: 'main']],
+                        userRemoteConfigs:[[
+                            credentialsId: 'github-creds',
+                            url: 'https://github.com/MangeshGot/vortex-gitops'
+                        ]]
+                        extensions: [[$class: 'RelativeTargetDirectory', basedir: 'vortex-gitops']]
+                    )
+                    sh "sed -i 's/IMAGE_TAG_PLACEHOLDER/${env.FullTag}/g' vortex-gitops/k8s/deployment.yml"
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'github-creds', 
+                            usernameVariable: 'USERNAME', 
+                            passwordVariable: 'PASSWORD')
+                    ]){
+                        sh "cd vortex-gitops/k8s"
+                        sh "git add ."
+                        sh "git commit -m 'Update image tag to ${env.FullTag}'"
+                        sh "git push https://${USERNAME}:${PASSWORD}@github.com/MangeshGot/vortex-gitops.git"
+                    }   
+                }
             }
         }
     }
