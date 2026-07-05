@@ -63,7 +63,7 @@ pipeline {
                         ]){
                             sh """
                                 git config user.name "MangeshGot"
-                                git config user.email "mangesh@example.com"
+                                git config user.email "m.sonawanegot@gmail.com"
                                 git add k8s/deployment.yml
                                 git commit -m 'Update image tag to ${env.FullTag}'
                                 git push https://${USERNAME}:${PASSWORD}@github.com/MangeshGot/vortex-gitops.git HEAD:main
